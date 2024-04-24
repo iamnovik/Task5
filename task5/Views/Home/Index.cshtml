@@ -27,6 +27,7 @@
             // Функция для загрузки данных
             function loadData(region, errorCount, seed, page) {
                    errorCount = parseFloat(errorCount);
+                   console.log(errorCount)
                     $.ajax({
                         url: '@Url.Action("GenerateData", "Home")',
                         type: 'POST',
