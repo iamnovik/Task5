@@ -1,0 +1,176 @@
+﻿@{
+    ViewData["Title"] = "Fake Data Generator";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewData["Title"]</title>
+     <style>
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+    
+            th, td {
+                padding: 10px;
+                border: 1px solid black;
+            }
+        </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var currentSeed = parseInt($('#seed').val());
+            var currentPage = 1;// Текущее значение seed
+            // Функция для загрузки данных
+            function loadData(region, errorCount, seed, page) {
+                   errorCount = parseFloat(errorCount);
+                    $.ajax({
+                        url: '@Url.Action("GenerateData", "Home")',
+                        type: 'POST',
+                        data: {
+                            region: region,
+                            errorCount: errorCount.toFixed(2).replace('.', ','),
+                            seed: seed,
+                            page: page // Передаем номер страницы
+                        },
+                        success: function (data) {
+                            if (currentPage > 1){
+                                 $('#userData').append(data);
+                            }else{
+                                $('#userData').html(data);
+                            }
+                            // Обновляем высоту документа, чтобы включить новые данные
+                            $(document).height($(document).height() + $('#userData tr').length * 20);
+                        }
+                    });
+                }
+            $('#region, #seed, #errorCount, #errorCountNumber').change(function (){
+                var region = $('#region').val();
+                var errorCountNumber = parseFloat($('#errorCountNumber').val());
+                var seed = $('#seed').val();
+                var errorCount = parseFloat($('#errorCount').val());
+                if (event.target.id === 'errorCount') {
+                    $('#errorCountNumber').val(errorCount);
+                    errorCountNumber = errorCount;
+                    
+                }
+                
+                    // Обновляем значение errorCount, если изменилось поле errorCountNumber
+                if (event.target.id === 'errorCountNumber') {
+                    $('#errorCount').val(Math.min(errorCountNumber, parseFloat($('#errorCount').attr('max'))));
+                    
+                }
+                
+                console.log(errorCountNumber);
+                currentPage = 1; 
+                loadData(region, errorCountNumber, seed, currentPage);    
+            });
+            // Обработчик изменения параметров
+           
+            
+            $('#randomSeed').click(function () {
+                // Генерация случайного значения для поля seed
+                var randomSeed = Math.floor(Math.random() * 1000);
+                $('#seed').val(randomSeed);
+            
+                // Загрузка данных с новым значением seed
+                var region = $('#region').val();
+                var errorCount = $('#errorCount').val();
+                loadData(region, errorCount, randomSeed, currentPage);
+            });
+            
+            $(window).scroll(function () {
+                    // Если достигнут конец страницы
+                    if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+                        currentPage++;
+                        currentSeed++;
+                        var region = $('#region').val();
+                        var errorCount = $('#errorCount').val();
+                        loadData(region, errorCount, currentSeed, currentPage); // Загружаем следующую страницу
+                    }
+                });
+            
+            // Загрузка данных при загрузке страницы
+            loadData($('#region').val(), $('#errorCount').val(), $('#seed').val(), currentPage);
+            function exportToCsv() {
+                        // Получаем данные из таблицы
+                        var tableData = [];
+                        $('#userData tr').each(function() {
+                            var rowData = [];
+                            $(this).find('td').each(function() {
+                                rowData.push($(this).text());
+                            });
+                            tableData.push(rowData);
+                        });
+            
+                        // Преобразуем данные в формат CSV
+                        var csvData = Papa.unparse(tableData);
+            
+                        // Создаем ссылку для скачивания
+                        var blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+                        var link = document.createElement("a");
+                        link.href = URL.createObjectURL(blob);
+                        link.setAttribute("download", "UserData.csv");
+                        document.body.appendChild(link);
+                        // Симулируем нажатие на ссылку для скачивания
+                        link.click();
+            
+                        // Удаляем ссылку после скачивания
+                        document.body.removeChild(link);
+                    }
+            
+                    // Обработчик клика на кнопку "Export to CSV"
+                    $('#ExportToCSV').click(function() {
+                        exportToCsv();
+                    });
+            
+            
+
+
+        });
+    </script>
+    
+    
+</head>
+<body>
+    <h2>Fake Data Generator</h2>
+    <div>
+        <label for="region">Region:</label>
+        <select id="region">
+            <option value="USA">USA</option>
+            <option value="Poland">Poland</option>
+            <option value="Russia">Russia</option>
+        </select>
+    </div>
+    <div>
+        <label for="errorCount">Error Count:</label>
+        <input type="range" id="errorCount" name="errorCount" min="0" max="10" step="0.25" value="0" />
+        <input type="number" id="errorCountNumber" name="errorCountNumber" min="0" max="1000" value="0" />
+    </div>
+<div>
+    <label for="seed">Seed:</label>
+    <input type="number" id="seed" name="seed" min="0" value="0" />
+    <button id="randomSeed">Random</button>
+</div>
+    <table>
+        <thead>
+        <tr>
+            <th>Number</th>
+            <th>Id</th>
+            <th>FullName</th>
+            <th>Address</th>
+            <th>PhoneNumber</th>
+            <button id="ExportToCSV">Export to CSV</button>
+
+        </tr>
+        </thead>
+        <tbody id="userData">
+                <!-- Здесь будут добавляться строки данных -->
+            </tbody>
+    </table>
+    
+</body>
+</html>

@@ -1,0 +1,13 @@
+﻿@model List<UserData>
+
+    @foreach (var userData in Model)
+    {
+        <tr>
+            <td>@userData.Number</td>
+            <td>@userData.Id</td>
+            <td>@userData.FullName</td>
+            <td>@userData.Address</td>
+            <td>@userData.PhoneNumber</td>
+        </tr>
+    }
+
