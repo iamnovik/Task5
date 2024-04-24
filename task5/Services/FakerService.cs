@@ -6,7 +6,10 @@ namespace task5.Services;
 
 public class FakerService : IFakerService
 {
-    public List<UserData> GenerateFakeData(string region, int seed, int page)
+    
+    
+    
+    public List<UserData> GenerateFakeData(string region, int seed, int page, double errorCount)
         {
             var culture = GetCultureCode(region);
             var faker = new Faker(culture);
@@ -27,7 +30,7 @@ public class FakerService : IFakerService
 
                 fakeDataList.Add(userData);
             }
-
+            AddErrorsToUserDataList(fakeDataList, errorCount, faker);
             return fakeDataList;
         }
 
@@ -49,19 +52,18 @@ public class FakerService : IFakerService
         
 
         // Метод для добавления ошибок к данным пользователя
-        public void AddErrorsToUserDataList(List<UserData> userDataList, double errorCount)
+        public void AddErrorsToUserDataList(List<UserData> userDataList, double errorCount, Faker faker)
         {
-            Random rnd = new Random();
             foreach (var userData in userDataList)
             {
                 double fractionalPart = errorCount - Math.Floor(errorCount);
-                double randomDouble = rnd.NextDouble();
+                double randomDouble = faker.Random.Double();
                 if (randomDouble <= fractionalPart)
                 {
-                var propertyIndex = rnd.Next(2, 5);
+                var propertyIndex = faker.Random.Int(2, 4);
 
                 // Генерация случайного вида ошибки
-                var errorType = rnd.Next(0, 3);
+                var errorType = faker.Random.Int(0, 2);
 
                 // Ошибка в номере
                 if (errorType == 0)
@@ -69,15 +71,15 @@ public class FakerService : IFakerService
                     // Удаление одного символа в случайной позиции
                     if (userData[propertyIndex].Length > 0)
                     {
-                        var indexToRemove = rnd.Next(0, userData[propertyIndex].Length);
+                        var indexToRemove = faker.Random.Int(0, userData[propertyIndex].Length - 1);
                         userData[propertyIndex] = userData[propertyIndex].Remove(indexToRemove, 1);
                     }
                 }
                 else if (errorType == 1)
                 {
                     // Добавление одного случайного символа в случайной позиции
-                    var indexToAdd = rnd.Next(0, userData[propertyIndex].Length);
-                    var randomChar = Convert.ToChar(rnd.Next(0,26) + 65); 
+                    var indexToAdd = faker.Random.Int(0, userData[propertyIndex].Length - 1);
+                    var randomChar = Convert.ToChar(faker.Random.Int(0,26) + 65); 
                     userData[propertyIndex] = userData[propertyIndex].Insert(indexToAdd, randomChar.ToString());
                 }
                 else if (errorType == 2)
@@ -85,7 +87,7 @@ public class FakerService : IFakerService
                     // Перестановка двух соседних символов местами
                     if (userData[propertyIndex].Length > 1)
                     {
-                        var indexToSwap = rnd.Next(0, userData[propertyIndex].Length - 1);
+                        var indexToSwap = faker.Random.Int(0, userData[propertyIndex].Length - 2);
                         var tempChar = userData[propertyIndex][indexToSwap];
                         userData[propertyIndex] = userData[propertyIndex].Remove(indexToSwap, 1).Insert(indexToSwap + 1, tempChar.ToString());
                     }
@@ -96,10 +98,10 @@ public class FakerService : IFakerService
             for (int i = 0; i < errorCount; i++)
             {
                 // Генерация случайного индекса свойства
-                var propertyIndex = rnd.Next(2, 5);
+                var propertyIndex = faker.Random.Int(2, 4);
 
                 // Генерация случайного вида ошибки
-                var errorType = rnd.Next(0, 3);
+                var errorType = faker.Random.Int(0, 2);
 
                 // Ошибка в номере
                 if (errorType == 0)
@@ -107,15 +109,15 @@ public class FakerService : IFakerService
                     // Удаление одного символа в случайной позиции
                     if (userData[propertyIndex].Length > 0)
                     {
-                        var indexToRemove = rnd.Next(0, userData[propertyIndex].Length);
+                        var indexToRemove = faker.Random.Int(0, userData[propertyIndex].Length - 1);
                         userData[propertyIndex] = userData[propertyIndex].Remove(indexToRemove, 1);
                     }
                 }
                 else if (errorType == 1)
                 {
                     // Добавление одного случайного символа в случайной позиции
-                    var indexToAdd = rnd.Next(0, userData[propertyIndex].Length);
-                    var randomChar = Convert.ToChar(rnd.Next(0,26) + 65); 
+                    var indexToAdd = faker.Random.Int(0, userData[propertyIndex].Length - 1);
+                    var randomChar = Convert.ToChar(faker.Random.Int(0,26) + 65); 
                     userData[propertyIndex] = userData[propertyIndex].Insert(indexToAdd, randomChar.ToString());
                 }
                 else if (errorType == 2)
@@ -123,7 +125,7 @@ public class FakerService : IFakerService
                     // Перестановка двух соседних символов местами
                     if (userData[propertyIndex].Length > 1)
                     {
-                        var indexToSwap = rnd.Next(0, userData[propertyIndex].Length - 1);
+                        var indexToSwap = faker.Random.Int(0, userData[propertyIndex].Length - 2);
                         var tempChar = userData[propertyIndex][indexToSwap];
                         userData[propertyIndex] = userData[propertyIndex].Remove(indexToSwap, 1).Insert(indexToSwap + 1, tempChar.ToString());
                     }

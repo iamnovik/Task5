@@ -36,8 +36,7 @@ public class HomeController : Controller
     public IActionResult GenerateData(string region, decimal errorCount, int seed, int page)
     {
         _logger.LogInformation("Received region: {region}, errorCount: {errorCount}, seed: {seed}, page: {page}", region, (double)errorCount, seed, page);
-        var fakeData = _faker.GenerateFakeData(region, seed, page);
-        _faker.AddErrorsToUserDataList(fakeData, (double)errorCount);
+        var fakeData = _faker.GenerateFakeData(region, seed, page, (double)errorCount);
         // Отправка данных в представление
         return PartialView("_UserDataPartial", fakeData);
     }
